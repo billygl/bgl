@@ -7,14 +7,23 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'bgl',
+    title: 'Billy Grados',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
+      { hid: 'description', name: 'description', content: "Billy Grados's web page" },
       { name: 'format-detection', content: 'telephone=no' },
+      { name: 'author', content: 'Billy Grados' },
+      { property: 'og:site_name', content: "Billy Grados" },
+      { property: 'og:title', content: "Billy Grados" },
+      { hid: 'og:url', property: 'og:url', content: 'https://billygl.github.io/' },
+      { hid: 'og:description', property: 'og:description', content: "Billy Grados's web page" },
+      { hid: 'og:image', property: 'og:image', content: 'images/image.png' }
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { hid: 'icon', rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css

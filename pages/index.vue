@@ -1,5 +1,5 @@
 <template>
-  <Tutorial />
+  <BGPortfolio />
 </template>
 
 <script>
