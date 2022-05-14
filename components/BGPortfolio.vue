@@ -14,11 +14,11 @@
         <p class="mt-3 text-gray-600">
           
         </p>
-        <div v-show="!isSetup">
+        <div v-show="isLoading">
           <div class="flex justify-between text-gray-600">
             Loading... <ImgSpinner/>
           </div>
-          <div class="w-full aspect-w-1 aspect-h-1 xl:aspect-w-7 xl:aspect-h-8">
+          <div class="w-full aspect-w-1 aspect-h-1 xl:aspect-w-7 xl:aspect-h-8 bg-gray-100 rounded-lg">
             <canvas ref="loading" class="w-full h-full object-center object-cover">
             </canvas>
           </div>
@@ -164,42 +164,62 @@ export default {
             projects,
             canvas: {},
             imgs: {},
-            isSetup: false
+            isSetup: false,
+            isLoading: true,
         };
     },
     mounted() {
-      this.setupLoading()
+        this.setupLoading()
         this.$nextTick(() => {
             window.addEventListener("resize", this.resizeCanvas);
-            this.resizeCanvas();
         });
         this.resizeCanvas();
     },
     methods: {
+        drawImage(image, canvas, containerWidth, containerHeight){
+          const ratio = containerWidth / containerHeight;
+          const corner = {
+              left: 0,
+              top: 0,
+          };
+          const breakRatio = 1.2;
+          if (ratio > breakRatio) {
+              image.scaleToHeight(containerHeight);
+          }
+          else if (ratio <= breakRatio) {
+              image.scaleToWidth(containerWidth);
+          }
+          const height = image.height * image.scaleY;
+          const width = image.width * image.scaleX;
+          if (ratio > breakRatio) {
+              corner.left = (containerWidth - width) / 2;
+          }
+          else if (ratio <= breakRatio) {
+              corner.top = (canvas.height - height) / 2;
+          }
+          image.set(corner);
+          return {
+            width,
+            height,
+            corner
+          }
+        },
         drawTech(techs, index, canvas){
-          const containerHeight = this.$refs.loading.parentElement.offsetHeight
-          const containerWidth = this.$refs.loading.parentElement.offsetWidth
           const path = IMAGE_TECHS + techs[index] + IMAGE_EXTENSION_SVG;
           fabric.Image.fromURL(path, (oImg) => {
-            const ratio = oImg.width / oImg.height
-            if(ratio > 2){
-              oImg.scaleToWidth(containerWidth)              
-            }else{
-              oImg.scaleToHeight(containerHeight)
-            }
-            const width = oImg.width * oImg.scaleX
-            const height = oImg.height * oImg.scaleY          
-            oImg.set({
-                top: ( containerHeight - height ) / 2,
-                left: ( containerWidth - width ) / 2
-              })
+            const containerHeight = this.$refs.loading.parentElement.offsetHeight
+            const containerWidth = this.$refs.loading.parentElement.offsetWidth
+            this.drawImage(oImg, canvas, containerWidth, containerHeight)
             canvas.clear()
+            canvas.setWidth(containerWidth);
             canvas.add(oImg)
           })
-          setTimeout(
-            this.drawTech, 1000, 
-            techs, index === techs.length - 1 ? 0 : index + 1, canvas
-          )
+          if(this.isLoading){
+            setTimeout(
+              this.drawTech, 1000, 
+              techs, index === techs.length - 1 ? 0 : index + 1, canvas
+            )
+          }
         },
         setupLoading(){
           const canvas = new fabric.StaticCanvas(this.$refs.loading)
@@ -256,8 +276,13 @@ export default {
             });
             Promise.all(promises)
                 .then(() => {
-                this.updateCanvas(id, container);
                 this.isSetup = true
+                setTimeout(() => {
+                  this.updateCanvas(id, container)
+                }, 20)
+                setTimeout(() => {
+                  // this.isLoading = false
+                }, 1000)
             });
             return promises;
         },
@@ -266,45 +291,27 @@ export default {
             if (group) {
                 const containerWidth = container.offsetWidth;
                 const containerHeight = container.offsetHeight;
-                const ratio = containerWidth / containerHeight;
                 // background
                 const background = group.background;
-                const corner = {
-                    left: 0,
-                    top: 0,
-                };
-                const breakRatio = 1.2;
-                if (ratio > breakRatio) {
-                    background.scaleToHeight(containerHeight);
-                }
-                else if (ratio <= breakRatio) {
-                    background.scaleToWidth(containerWidth);
-                }
-                const backgroundHeight = background.height * background.scaleY;
-                const backgroundWidth = background.width * background.scaleX;
-                if (ratio > breakRatio) {
-                    corner.left = (containerWidth - backgroundWidth) / 2;
-                }
-                else if (ratio <= breakRatio) {
-                    corner.top = (this.canvas[id].height - backgroundHeight) / 2;
-                }
-                background.set(corner);
+                const dimen = this.drawImage(
+                  background, this.canvas[id], containerWidth, containerHeight
+                )
                 // tech & frameworks
-                const techHeight = backgroundHeight / 3;
+                const techHeight = dimen.height / 3;
                 group.tech.forEach((t, index) => {
                     t.set({
-                        left: corner.left,
-                        top: corner.top + index * techHeight + 5
+                        left: dimen.corner.left,
+                        top: dimen.corner.top + index * techHeight + 5
                     });
                     t.scaleToHeight(techHeight);
                 });
-                const frameworkHeight = backgroundHeight * 0.22;
+                const frameworkHeight = dimen.height * 0.22;
                 group.frameworks && group.frameworks.forEach((f, index) => {
                     f.scaleToHeight(frameworkHeight);
                     const fWidth = f.width * f.scaleX;
                     f.set({
-                        left: corner.left + backgroundWidth - fWidth - 10,
-                        top: corner.top + index * frameworkHeight + 5,
+                        left: dimen.corner.left + dimen.width - fWidth - 10,
+                        top: dimen.corner.top + index * frameworkHeight + 5,
                     });
                 });
                 this.canvas[id].setWidth(containerWidth);
