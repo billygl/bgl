@@ -257,7 +257,7 @@ export default {
             Promise.all(promises)
                 .then(() => {
                 this.updateCanvas(id, container);
-                // this.isSetup = true
+                this.isSetup = true
             });
             return promises;
         },
