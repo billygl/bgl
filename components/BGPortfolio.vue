@@ -14,11 +14,11 @@
         <p class="mt-3 text-gray-600">
           
         </p>
-        <div v-show="isLoading">
+        <div v-show="isLoading" class="grid grid-cols-1">
           <div class="flex justify-between text-gray-600">
             Loading... <ImgSpinner/>
           </div>
-          <div class="w-full aspect-w-1 aspect-h-1 xl:aspect-w-7 xl:aspect-h-8 bg-gray-100 rounded-lg">
+          <div class="w-full aspect-w-1 aspect-h-1 xl:aspect-w-7 xl:aspect-h-8 overflow-hidden bg-gray-100 rounded-lg">
             <canvas ref="loading" class="w-full h-full object-center object-cover">
             </canvas>
           </div>
@@ -164,6 +164,9 @@ export default {
             projects,
             canvas: {},
             imgs: {},
+            frameworks: [],
+            currentFramework: 0,
+            loadingCanvas: null,
             isSetup: false,
             isLoading: true,
         };
@@ -204,31 +207,48 @@ export default {
             corner
           }
         },
-        drawTech(techs, index, canvas){
-          const path = IMAGE_TECHS + techs[index] + IMAGE_EXTENSION_SVG;
+        drawTech(){
+          const path = IMAGE_TECHS + 
+            this.frameworks[this.currentFramework] + IMAGE_EXTENSION_SVG;
+          const element = this.$refs.loading
           fabric.Image.fromURL(path, (oImg) => {
-            const containerHeight = this.$refs.loading.parentElement.offsetHeight
-            const containerWidth = this.$refs.loading.parentElement.offsetWidth
-            this.drawImage(oImg, canvas, containerWidth, containerHeight)
-            canvas.clear()
-            canvas.setWidth(containerWidth);
-            canvas.add(oImg)
+            this.loadingCanvas.clear()
+            this.loadingCanvas.add(oImg)
+            const containerHeight = element.parentElement.offsetHeight
+            const containerWidth = element.parentElement.offsetWidth
+            this.loadingCanvas.setWidth(containerWidth)
+            this.drawImage(oImg, this.loadingCanvas, containerWidth, containerHeight)
+            this.loadingCanvas.renderAll()
           })
+        },
+        updateDrawTech(){
           if(this.isLoading){
-            setTimeout(
-              this.drawTech, 1000, 
-              techs, index === techs.length - 1 ? 0 : index + 1, canvas
-            )
+            this.drawTech()
+            setTimeout( () => {
+              this.currentFramework = 
+                  this.currentFramework === this.frameworks.length - 1 ? 
+                  0 : this.currentFramework + 1
+              this.updateDrawTech()
+            }, 800)
           }
         },
         setupLoading(){
-          const canvas = new fabric.StaticCanvas(this.$refs.loading)
           const frameworks = _.chain(this.projects)
             .map('frameworks')
             .flatten()
             .uniq()
             .value()
-          this.drawTech(frameworks, 0, canvas)
+          const tech = _.chain(this.projects)
+            .map('tech')
+            .flatten()
+            .uniq()
+            .value()
+          this.frameworks = _.concat(tech, frameworks)
+          this.loadingCanvas = new fabric.StaticCanvas(this.$refs.loading)
+          this.updateDrawTech()
+          setTimeout(() => {
+            this.drawTech()
+          }, 1) 
         },
         slug(str) {
             return str.toLowerCase().replaceAll(" ", "");
@@ -281,8 +301,8 @@ export default {
                   this.updateCanvas(id, container)
                 }, 20)
                 setTimeout(() => {
-                  // this.isLoading = false
-                }, 1000)
+                  this.isLoading = false
+                }, 2000)
             });
             return promises;
         },
@@ -319,6 +339,7 @@ export default {
             }
         },
         resizeCanvas() {
+            this.drawTech()
             this.projects.forEach(p => {
                 const id = p.id;
                 const container = this.$refs[id][0].parentElement;
@@ -328,7 +349,7 @@ export default {
                         this.setup(p, this.canvas[id], container);
                     }
                     else {
-                        this.updateCanvas(id, container);
+                        this.updateCanvas(id, container)
                     }
                 }
             });
