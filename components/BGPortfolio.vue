@@ -14,7 +14,18 @@
         <p class="mt-3 text-gray-600">
           
         </p>
-        <div class="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+        <div v-show="!isSetup">
+          <div class="flex justify-between text-gray-600">
+            Loading... <ImgSpinner/>
+          </div>
+          <div class="w-full aspect-w-1 aspect-h-1 xl:aspect-w-7 xl:aspect-h-8">
+            <canvas ref="loading" class="w-full h-full object-center object-cover">
+            </canvas>
+          </div>
+        </div>
+        <div 
+          v-show="isSetup"
+          class="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           <div v-for="(project, index) in projects" :key="index" class="group">
             <div class="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden xl:aspect-w-7 xl:aspect-h-8">
               <canvas :ref="project.id" class="w-full h-full object-center object-cover group-hover:opacity-75">
@@ -40,6 +51,7 @@
 
 <script>
 import { fabric } from "fabric";
+import _ from "lodash";
 const ARRAY_SEPARATOR = ','
 const PROJECTS = [
   {
@@ -133,146 +145,187 @@ const PROJECTS = [
     "frameworks": "Flask, ReactJS, Android"
   }
 ]
+const IMAGE_PROJECTS = "images/projects/"
+const IMAGE_TECHS = "images/techs/"
+const IMAGE_EXTENSION_SVG = ".svg"
+const IMAGE_EXTENSION_JPG = ".jpg"
 export default {
-  name: 'BGPortfolio',
-  data() {
-    const projects = PROJECTS.map( p => {
-      p.industry = p.industry.toLowerCase()
-      p.tech = this.slug(p.tech)
-      p.tech = p.tech ? p.tech.split(ARRAY_SEPARATOR) : []
-      p.frameworks = this.slug(p.frameworks)
-      p.frameworks = p.frameworks ? p.frameworks.split(ARRAY_SEPARATOR) : []
-      return p
-    })
-    return {
-      projects,
-      canvas: {},
-      imgs: {},
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-        window.addEventListener("resize", this.resizeCanvas);
+    name: "BGPortfolio",
+    data() {
+        const projects = PROJECTS.map(p => {
+            p.industry = p.industry.toLowerCase();
+            p.tech = this.slug(p.tech);
+            p.tech = p.tech ? p.tech.split(ARRAY_SEPARATOR) : [];
+            p.frameworks = this.slug(p.frameworks);
+            p.frameworks = p.frameworks ? p.frameworks.split(ARRAY_SEPARATOR) : [];
+            return p;
+        });
+        return {
+            projects,
+            canvas: {},
+            imgs: {},
+            isSetup: false
+        };
+    },
+    mounted() {
+      this.setupLoading()
+        this.$nextTick(() => {
+            window.addEventListener("resize", this.resizeCanvas);
+            this.resizeCanvas();
+        });
         this.resizeCanvas();
-    })
-    this.resizeCanvas()
-  },
-  methods: {
-    slug(str){
-      return str.toLowerCase().replaceAll(' ', '')
     },
-    addImage(type, id, path, canvas){
-      return new Promise( (resolve) => {
-        fabric.Image.fromURL(path, (oImg) => {
-          const imgs = this.imgs[id] || {} 
-          if(type === 'background'){
-            canvas.sendToBack(oImg)
-            imgs[type] = oImg
-          }else{
-            const rect = new fabric.Rect({
-              width: oImg.width, height: oImg.height,
-              fill: '#fff',
-              opacity: 0.65
-            })
-            const group = new fabric.Group([ rect, oImg])
-            canvas.add(group)
-
-            imgs[type] = imgs[type] || []
-            imgs[type].push(group)
-          }
-          this.imgs[id] = imgs
-          resolve()
-        })
-      })
-    },
-    setup(p, canvas, container){
-      const id = p.id
-      const promises = []
-      // background
-      let image
-      image = 'images/projects/' + p.industry + '.jpg'
-      promises.push(this.addImage('background', id, image, canvas))
-      
-      // p.tech & p.frameworks
-      p.tech.forEach( t => {
-        image = 'images/techs/' + t + '.svg'
-        promises.push(this.addImage('tech', id, image, canvas))
-      })
-      p.frameworks.forEach( f => {
-        image = 'images/techs/' + f + '.svg'
-        promises.push(this.addImage('frameworks', id, image, canvas))
-      })
-
-      Promise.all(promises)
-      .then(() => {
-        this.updateCanvas(id, container)
-      })
-      return promises
-    },
-    updateCanvas(id, container){
-      const group = this.imgs[id]
-      if(group){
-        const containerWidth = container.offsetWidth
-        const containerHeight = container.offsetHeight
-        const ratio = containerWidth / containerHeight
-        // background
-        const background = group.background
-        const corner = {
-          left: 0,
-          top: 0,
-        }
-        const breakRatio = 1.2
-        if(ratio > breakRatio){
-          background.scaleToHeight(containerHeight)
-        }else if(ratio <= breakRatio){
-          background.scaleToWidth(containerWidth)
-        }
-        const backgroundHeight = background.height * background.scaleY
-        const backgroundWidth = background.width * background.scaleX
-        if(ratio > breakRatio){
-          corner.left = (containerWidth - backgroundWidth) / 2
-        }else if(ratio <= breakRatio){
-          corner.top = (this.canvas[id].height - backgroundHeight) / 2
-        }
-        background.set(corner)
-
-        // tech & frameworks
-        const techHeight = backgroundHeight / 3
-        group.tech.forEach( (t, index) => {
-          t.set({
-            left: corner.left,
-            top: corner.top + index * techHeight + 5
+    methods: {
+        drawTech(techs, index, canvas){
+          const containerHeight = this.$refs.loading.parentElement.offsetHeight
+          const containerWidth = this.$refs.loading.parentElement.offsetWidth
+          const path = IMAGE_TECHS + techs[index] + IMAGE_EXTENSION_SVG;
+          fabric.Image.fromURL(path, (oImg) => {
+            const ratio = oImg.width / oImg.height
+            if(ratio > 2){
+              oImg.scaleToWidth(containerWidth)              
+            }else{
+              oImg.scaleToHeight(containerHeight)
+            }
+            const width = oImg.width * oImg.scaleX
+            const height = oImg.height * oImg.scaleY          
+            oImg.set({
+                top: ( containerHeight - height ) / 2,
+                left: ( containerWidth - width ) / 2
+              })
+            canvas.clear()
+            canvas.add(oImg)
           })
-          t.scaleToHeight(techHeight)
-        })
-        const frameworkHeight = backgroundHeight * 0.22
-        group.frameworks && group.frameworks.forEach( (f, index) => {
-          f.scaleToHeight(frameworkHeight)
-          const fWidth = f.width * f.scaleX
-          f.set({
-            left: corner.left + backgroundWidth - fWidth - 10,
-            top: corner.top + index * frameworkHeight + 5,
-          })
-        })
-
-        this.canvas[id].setWidth(containerWidth)
-        this.canvas[id].renderAll()
-      }
-    },
-    resizeCanvas(){
-      this.projects.forEach(p => {
-        const id = p.id
-        const container = this.$refs[id][0].parentElement
-        if(container){
-          if(!this.canvas[id]){
-            this.canvas[id] = new fabric.StaticCanvas(this.$refs[id][0])
-            this.setup(p, this.canvas[id], container)
-          }else{
-            this.updateCanvas(id, container)
-          }
+          setTimeout(
+            this.drawTech, 1000, 
+            techs, index === techs.length - 1 ? 0 : index + 1, canvas
+          )
+        },
+        setupLoading(){
+          const canvas = new fabric.StaticCanvas(this.$refs.loading)
+          const frameworks = _.chain(this.projects)
+            .map('frameworks')
+            .flatten()
+            .uniq()
+            .value()
+          this.drawTech(frameworks, 0, canvas)
+        },
+        slug(str) {
+            return str.toLowerCase().replaceAll(" ", "");
+        },
+        addImage(type, id, path, canvas) {
+            return new Promise((resolve) => {
+                fabric.Image.fromURL(path, (oImg) => {
+                    const imgs = this.imgs[id] || {};
+                    if (type === "background") {
+                        canvas.sendToBack(oImg);
+                        imgs[type] = oImg;
+                    }
+                    else {
+                        const rect = new fabric.Rect({
+                            width: oImg.width,
+                            height: oImg.height,
+                            fill: "#fff",
+                            opacity: 0.65
+                        });
+                        const group = new fabric.Group([rect, oImg]);
+                        canvas.add(group);
+                        imgs[type] = imgs[type] || [];
+                        imgs[type].push(group);
+                    }
+                    this.imgs[id] = imgs;
+                    resolve();
+                });
+            });
+        },
+        setup(p, canvas, container) {
+            const id = p.id;
+            const promises = [];
+            // background
+            let image;
+            image = IMAGE_PROJECTS + p.industry + IMAGE_EXTENSION_JPG;
+            promises.push(this.addImage("background", id, image, canvas));
+            // p.tech & p.frameworks
+            p.tech.forEach(t => {
+                image = IMAGE_TECHS + t + IMAGE_EXTENSION_SVG;
+                promises.push(this.addImage("tech", id, image, canvas));
+            });
+            p.frameworks.forEach(f => {
+                image = IMAGE_TECHS + f + IMAGE_EXTENSION_SVG;
+                promises.push(this.addImage("frameworks", id, image, canvas));
+            });
+            Promise.all(promises)
+                .then(() => {
+                this.updateCanvas(id, container);
+                // this.isSetup = true
+            });
+            return promises;
+        },
+        updateCanvas(id, container) {
+            const group = this.imgs[id];
+            if (group) {
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                const ratio = containerWidth / containerHeight;
+                // background
+                const background = group.background;
+                const corner = {
+                    left: 0,
+                    top: 0,
+                };
+                const breakRatio = 1.2;
+                if (ratio > breakRatio) {
+                    background.scaleToHeight(containerHeight);
+                }
+                else if (ratio <= breakRatio) {
+                    background.scaleToWidth(containerWidth);
+                }
+                const backgroundHeight = background.height * background.scaleY;
+                const backgroundWidth = background.width * background.scaleX;
+                if (ratio > breakRatio) {
+                    corner.left = (containerWidth - backgroundWidth) / 2;
+                }
+                else if (ratio <= breakRatio) {
+                    corner.top = (this.canvas[id].height - backgroundHeight) / 2;
+                }
+                background.set(corner);
+                // tech & frameworks
+                const techHeight = backgroundHeight / 3;
+                group.tech.forEach((t, index) => {
+                    t.set({
+                        left: corner.left,
+                        top: corner.top + index * techHeight + 5
+                    });
+                    t.scaleToHeight(techHeight);
+                });
+                const frameworkHeight = backgroundHeight * 0.22;
+                group.frameworks && group.frameworks.forEach((f, index) => {
+                    f.scaleToHeight(frameworkHeight);
+                    const fWidth = f.width * f.scaleX;
+                    f.set({
+                        left: corner.left + backgroundWidth - fWidth - 10,
+                        top: corner.top + index * frameworkHeight + 5,
+                    });
+                });
+                this.canvas[id].setWidth(containerWidth);
+                this.canvas[id].renderAll();
+            }
+        },
+        resizeCanvas() {
+            this.projects.forEach(p => {
+                const id = p.id;
+                const container = this.$refs[id][0].parentElement;
+                if (container) {
+                    if (!this.canvas[id]) {
+                        this.canvas[id] = new fabric.StaticCanvas(this.$refs[id][0]);
+                        this.setup(p, this.canvas[id], container);
+                    }
+                    else {
+                        this.updateCanvas(id, container);
+                    }
+                }
+            });
         }
-      })
     }
-  },
 }
 </script>
