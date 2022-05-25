@@ -44,6 +44,7 @@
           </div>
         </div>
       </div>
+      <BGMenu/>
       <BGFooter/>
     </div>
   </div>
