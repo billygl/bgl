@@ -153,12 +153,15 @@ export default {
     name: "BGPortfolio",
     data() {
         const projects = PROJECTS.map(p => {
-            p.industry = p.industry.toLowerCase();
-            p.tech = this.slug(p.tech);
-            p.tech = p.tech ? p.tech.split(ARRAY_SEPARATOR) : [];
-            p.frameworks = this.slug(p.frameworks);
-            p.frameworks = p.frameworks ? p.frameworks.split(ARRAY_SEPARATOR) : [];
-            return p;
+            const q = {
+              ...p,
+              industry: p.industry.toLowerCase(),
+              tech: this.slug(p.tech),
+              frameworks: this.slug(p.frameworks),
+            }
+            q.tech = q.tech ? q.tech.split(ARRAY_SEPARATOR) : [];
+            q.frameworks = q.frameworks ? q.frameworks.split(ARRAY_SEPARATOR) : [];
+            return q;
         });
         return {
             projects,
