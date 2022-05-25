@@ -4,12 +4,12 @@
     class="relative flex items-top justify-center min-h-screen bg-gray-100 sm:items-center sm:pt-0"
   >
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-      <div class="mt-8 bg-white overflow-hidden shadow sm:rounded-lg p-6">
+      <div class="mt-8 bg-white overflow-hidden shadow sm:rounded-lg p-6 pb-1">
         <h2 class="text-2xl leading-7 font-bold">
           Billy Grados
         </h2>
         <h3 class="text-lg leading-7 font-semibold">
-          Skills
+          Skills - Top advanced ones
         </h3>
         <div class="w-full">
           <Bar
@@ -119,12 +119,6 @@ const SKILLS = [
     "skill": "PostgreSQL"
   },
   {
-    "category": 3,
-    "yearsC": 1,
-    "yearsS": 0,
-    "skill": "Oracle Database"
-  },
-  {
     "category": 2,
     "yearsC": 4,
     "yearsS": 3,
@@ -146,25 +140,8 @@ export default {
     name: "BGSkills",
     components: { Bar },
     data() {
-      const skills = _.chain(SKILLS)
-      .sortBy( s => {
-        return -s.yearsS
-      })
-      .map( s => {
-        s.years = s.yearsS < 1 ? 1 : s.yearsS
-        return s
-      })
-      .groupBy('category')
-      .value()
-      let data = []
-      _.each(skills, (g, i) => {
-        labels.push(CATEGORIES[i - 1])
-        labels.push(_.map(g, 'skill'))
-        data.push(MAX_YEARS)
-        data.push(_.map(g, 'years'))
-      })
-      labels = _.flatten(labels)
-      data = _.flatten(data)
+      const data = this.setup()
+      console.log(data, labels)
       return {
         chartData: {
           labels,
@@ -236,6 +213,33 @@ export default {
           // height: '65vh',
           position: 'relative'
         }
+      }
+    },
+    mounted() {
+      this.setup()
+    },
+    methods: {
+      setup(){
+        labels = []
+        const skills = _.chain(SKILLS)
+        .sortBy( s => {
+          return -s.yearsS
+        })
+        .map( s => {
+          s.years = s.yearsS < 1 ? 1 : s.yearsS
+          return s
+        })
+        .groupBy('category')
+        .value()
+        const data = []
+        _.each(skills, (g, i) => {
+          labels.push(CATEGORIES[i - 1])
+          labels.push(_.map(g, 'skill'))
+          data.push(MAX_YEARS)
+          data.push(_.map(g, 'years'))
+        })
+        labels = _.flatten(labels)
+        return _.flatten(data)
       }
     }
 }
