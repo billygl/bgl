@@ -1,3 +1,17 @@
+# chartjs
+- https://www.chartjs.org/docs/
+- https://github.com/apertureless/vue-chartjs
+- https://chartjs-plugin-datalabels.netlify.app/guide/positioning.html#alignment-and-offset
+  - https://chartjs-plugin-datalabels.netlify.app/guide/formatting.html#custom-labels
+- others
+  - https://stackoverflow.com/questions/71657737/how-to-hide-chart-js-legend-in-vue
+  - https://github.com/apertureless/vue-chartjs/issues/180
+  - https://stackoverflow.com/questions/55545191/vue-chartjs-is-rendering-my-responsive-chart-too-tall-for-my-window
+  - https://stackoverflow.com/questions/63538860/vuejs-and-chartjs-chart-is-responsive-in-width-but-not-height
+  - https://stackoverflow.com/questions/36749509/removing-legend-on-charts-with-chart-js-v2
+  - https://www.chartjs.org/docs/3.7.1/samples/line/multi-axis.html
+  - https://stackoverflow.com/questions/44770620/chart-js-bar-chart-x-axis-label-disappeared
+  
 # image
 - https://imagecompressor.com/
 - https://realfavicongenerator.net/
