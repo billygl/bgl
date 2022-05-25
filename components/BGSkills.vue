@@ -153,18 +153,26 @@ export default {
         s.years = s.yearsS < 1 ? 1 : s.yearsS
         return s
       })
+      .groupBy('category')
       .value()
-      const labels = _.map(skills, 'skill')
-      const data = _.map(skills, 'years')
+      let labels = []
+      const datasets = []
+      _.each(skills, (g, i) => {
+        labels.push(_.map(g, 'skill'))
+        const data = _.map(g, 'years')
+        datasets.push({ 
+          label: i,
+          stack: i,
+          data,
+          borderWidth: 2,
+          borderRadius: 20,
+        })
+      })
+      labels = _.flatten(labels)
       return {
         chartData: {
           labels,
-          datasets: [ { 
-            label: 'years',
-            data,
-            borderWidth: 2,
-            borderRadius: 20,
-          } ],
+          datasets,
         },
         chartOptions: {
           indexAxis: 'y',
@@ -173,16 +181,21 @@ export default {
               borderWidth: 2,
             }
           },
-          xAxes: [{
-              stacked: true,
-              position: 'top'
+          scales: {
+            y: {
+              stacked: false,
             },
-            {
+            y1: {
+              grid: {
+                drawOnChartArea: false
+              },
               type: 'category',
               offset: true,
-              labels: ['database', 'pl', 'f']
-            }
-          ],
+              labels: [
+                'Programming Languages', 'Frameworks and Tools', 'Database'
+              ]
+            },
+          },
           plugins: {
             legend: {
               position: 'bottom',
