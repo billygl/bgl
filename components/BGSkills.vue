@@ -235,8 +235,8 @@ export default {
     computed: {
       myStyles () {
         return {
-          width: '90vw',
-          height: '65vh',
+          // width: '90vw',
+          // height: '65vh',
           position: 'relative'
         }
       }
