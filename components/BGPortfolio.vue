@@ -233,7 +233,7 @@ export default {
                   this.currentFramework === this.frameworks.length - 1 ? 
                   0 : this.currentFramework + 1
               this.updateDrawTech()
-            }, 800)
+            }, 700)
           }
         },
         setupLoading(){
@@ -252,7 +252,7 @@ export default {
           this.updateDrawTech()
           setTimeout(() => {
             this.drawTech()
-          }, 1) 
+          }, 1)
         },
         slug(str) {
             return str.toLowerCase().replaceAll(" ", "");
@@ -303,10 +303,8 @@ export default {
                 this.isSetup = true
                 setTimeout(() => {
                   this.updateCanvas(id, container)
-                }, 20)
-                setTimeout(() => {
                   this.isLoading = false
-                }, 2000)
+                }, 20)
             });
             return promises;
         },

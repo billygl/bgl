@@ -11,9 +11,6 @@
         <h3 class="text-lg leading-7 font-semibold">
           Skills
         </h3>
-        <p class="mt-3 text-gray-600">
-          
-        </p>
         <div class="w-full">
           <Bar
             :chart-options="chartOptions"
