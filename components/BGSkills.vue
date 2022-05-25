@@ -140,7 +140,11 @@ const SKILLS = [
     "skill": "Django"
   }
 ]
-
+const CATEGORIES = [
+  'Programming Languages', 'Frameworks & tools', 'Databases'
+]
+const MAX_YEARS = 10
+let labels = []
 export default {
     name: "BGSkills",
     components: { Bar },
@@ -155,24 +159,24 @@ export default {
       })
       .groupBy('category')
       .value()
-      let labels = []
-      const datasets = []
+      let data = []
       _.each(skills, (g, i) => {
+        labels.push(CATEGORIES[i - 1])
         labels.push(_.map(g, 'skill'))
-        const data = _.map(g, 'years')
-        datasets.push({ 
-          label: i,
-          stack: i,
-          data,
-          borderWidth: 2,
-          borderRadius: 20,
-        })
+        data.push(MAX_YEARS)
+        data.push(_.map(g, 'years'))
       })
       labels = _.flatten(labels)
+      data = _.flatten(data)
       return {
         chartData: {
           labels,
-          datasets,
+          datasets: [{ 
+            label: 'years',
+            data,
+            borderWidth: 2,
+            borderRadius: 20,
+          }],
         },
         chartOptions: {
           indexAxis: 'y',
@@ -183,26 +187,44 @@ export default {
           },
           scales: {
             y: {
-              stacked: false,
-            },
-            y1: {
-              grid: {
-                drawOnChartArea: false
-              },
-              type: 'category',
-              offset: true,
-              labels: [
-                'Programming Languages', 'Frameworks and Tools', 'Database'
-              ]
-            },
+              ticks: {
+                  autoSkip: false,
+                  callback: (value, index, ticks) => {
+                    const label = labels[index]
+                    return CATEGORIES.includes(label) ? '' : label
+                  }
+              }
+            }
           },
           plugins: {
             legend: {
               position: 'bottom',
+              onClick: null
+            },
+            tooltip: {
+              enabled: false
             },
             datalabels: {
-              anchor: 'end',
-              align: 'left'
+              anchor: (ctx) => {
+                return ctx.dataset.data[ctx.dataIndex] === MAX_YEARS ?
+                  'center' : 'end'
+              },
+              align: (ctx) => {
+                return ctx.dataset.data[ctx.dataIndex] === MAX_YEARS ?
+                  'center' : 'right'
+              },
+              font: (ctx) => {
+                return {
+                  weight: ctx.dataset.data[ctx.dataIndex] === MAX_YEARS ?
+                    'bold' : 'normal'
+                }
+              },
+              formatter: (value, context) => {
+                if(value === MAX_YEARS){
+                  return context.chart.data.labels[context.dataIndex]
+                }
+                return value;
+              }
             }
           },
           responsive: true,
@@ -213,8 +235,8 @@ export default {
     computed: {
       myStyles () {
         return {
-          // width: '50vw',
-          height: '70vh',
+          width: '90vw',
+          height: '65vh',
           position: 'relative'
         }
       }
