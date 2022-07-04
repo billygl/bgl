@@ -127,70 +127,70 @@ const SKILLS = [
     "display": 0,
     "yearsC": 10,
     "yearsS": 8,
-    "skill": "Desarrollo de software"
+    "skill": "Software Development"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 9,
     "yearsS": 7,
-    "skill": "Desarrollo web"
+    "skill": "Web Development"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 9,
     "yearsS": 7,
-    "skill": "Desarrollo Full Stack"
+    "skill": "Full Stack Development"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 2,
     "yearsS": 1,
-    "skill": "Aplicaciones web progresivas (PWA)"
+    "skill": "PWA"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 7,
     "yearsS": 6,
-    "skill": "Desarrollo de aplicaciones móviles"
+    "skill": "Mobile Development"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 12,
     "yearsS": 10,
-    "skill": "Investigación y desarrollo"
+    "skill": "Research & Development"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 10,
     "yearsS": 9,
-    "skill": "Innovación tecnológica"
+    "skill": "Innovation in Technology"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 10,
     "yearsS": 9,
-    "skill": "Gestión de Tecnologías de la Información"
+    "skill": "IT Management"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 10,
     "yearsS": 9,
-    "skill": "Gestión de proyectos"
+    "skill": "Project Management"
   },
   {
     "category": 4,
     "display": 0,
     "yearsC": 6,
     "yearsS": 5,
-    "skill": "Computación en la nube"
+    "skill": "Cloud Computing"
   },
   {
     "category": 4,
@@ -302,28 +302,28 @@ const SKILLS = [
     "display": 0,
     "yearsC": 12,
     "yearsS": 10,
-    "skill": "Creatividad"
+    "skill": "Creativity"
   },
   {
     "category": 5,
     "display": 0,
     "yearsC": 12,
     "yearsS": 10,
-    "skill": "Flexibilidad"
+    "skill": "Flexibility"
   },
   {
     "category": 5,
     "display": 0,
     "yearsC": 9,
     "yearsS": 8,
-    "skill": "Comunicación"
+    "skill": "Communication"
   },
   {
     "category": 5,
     "display": 0,
     "yearsC": 12,
     "yearsS": 10,
-    "skill": "Capacidad de análisis"
+    "skill": "Analytical skills"
   },
   {
     "category": 4,
