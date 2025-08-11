@@ -34,7 +34,7 @@
               fill="currentColor"
             /></svg
         ></a>
-        <a href="https://twitter.com/billygl" target="_blank"
+        <a href="https://www.linkedin.com/in/billygrados/" target="_blank"
           ><svg
             class="w-6 h-6 text-gray-600 hover:text-gray-800"
             xmlns="http://www.w3.org/2000/svg"
